@@ -4,6 +4,7 @@
     <x:Property Name="in_Config" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
     <x:Property Name="out_TransactionItem" Type="OutArgument(sd:DataRow)" />
     <x:Property Name="in_TransactionNumber" Type="InArgument(x:Int32)" />
+    <x:Property Name="io_DistrictName" Type="InOutArgument(x:String)" />
   </x:Members>
   <this:ReadInputData.in_Config>
     <InArgument x:TypeArguments="scg:Dictionary(x:String, x:Object)" />
@@ -14,7 +15,7 @@
   <VisualBasic.Settings>
     <x:Null />
   </VisualBasic.Settings>
-  <sap:VirtualizedContainerService.HintSize>822.4,2163.2</sap:VirtualizedContainerService.HintSize>
+  <sap:VirtualizedContainerService.HintSize>822.4,3122.4</sap:VirtualizedContainerService.HintSize>
   <sap2010:WorkflowViewState.IdRef>ReadInputData_1</sap2010:WorkflowViewState.IdRef>
   <TextExpression.NamespacesForImplementation>
     <sco:Collection x:TypeArguments="x:String">
@@ -52,6 +53,7 @@
       <x:String>UiPath.Excel.Activities.Business</x:String>
       <x:String>UiPath.Excel.Model</x:String>
       <x:String>UiPath.Shared.Activities</x:String>
+      <x:String>System.Numerics</x:String>
     </sco:Collection>
   </TextExpression.NamespacesForImplementation>
   <TextExpression.ReferencesForImplementation>
@@ -108,9 +110,10 @@
       <AssemblyReference>UiPath.OCR.Activities</AssemblyReference>
       <AssemblyReference>UiPath.UIAutomationCore</AssemblyReference>
       <AssemblyReference>UiPath.Workflow</AssemblyReference>
+      <AssemblyReference>System.Runtime.Numerics</AssemblyReference>
     </sco:Collection>
   </TextExpression.ReferencesForImplementation>
-  <Sequence DisplayName="Sequence : Read input" sap:VirtualizedContainerService.HintSize="793.6,2098.4" sap2010:WorkflowViewState.IdRef="Sequence_6">
+  <Sequence DisplayName="Sequence : Read input" sap:VirtualizedContainerService.HintSize="793.6,3057.6" sap2010:WorkflowViewState.IdRef="Sequence_6">
     <sap:WorkflowViewStateService.ViewState>
       <scg:Dictionary x:TypeArguments="x:String, x:Object">
         <x:Boolean x:Key="IsExpanded">True</x:Boolean>
@@ -172,7 +175,7 @@
         </Sequence>
       </If.Else>
     </If>
-    <If Condition="[io_dt_TransactionData.Rows.Count&gt;= in_TransactionNumber]" DisplayName="If : Transaction is not remaining " sap:VirtualizedContainerService.HintSize="731.2,548.8" sap2010:WorkflowViewState.IdRef="If_2">
+    <If Condition="[io_dt_TransactionData.Rows.Count&gt;= in_TransactionNumber]" DisplayName="If : Transaction is not remaining " sap:VirtualizedContainerService.HintSize="731.2,557.6" sap2010:WorkflowViewState.IdRef="If_2">
       <If.Then>
         <Sequence DisplayName="Then : Get next transaction item " sap:VirtualizedContainerService.HintSize="496,193.6" sap2010:WorkflowViewState.IdRef="Sequence_4">
           <sap:WorkflowViewStateService.ViewState>
@@ -205,6 +208,59 @@
               <InArgument x:TypeArguments="sd:DataRow">[Nothing]</InArgument>
             </Assign.Value>
           </Assign>
+        </Sequence>
+      </If.Else>
+    </If>
+    <If Condition="[(string.Join(&quot;,&quot;,out_TransactionItem.ItemArray)).Contains(&quot;DIST,,,&quot;)  OrElse (string.Join(&quot;,&quot;,out_TransactionItem.ItemArray)).Contains(&quot;DONE BY GOVT&quot;)]" DisplayName="If : Check for transaction row data " sap:VirtualizedContainerService.HintSize="731.2,950.4" sap2010:WorkflowViewState.IdRef="If_3">
+      <If.Then>
+        <Sequence DisplayName="Then : If transaction row is disctrict name " sap:VirtualizedContainerService.HintSize="496,534.4" sap2010:WorkflowViewState.IdRef="Sequence_9">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <Assign DisplayName="Assign :  Remove Unessary comma" sap:VirtualizedContainerService.HintSize="433.6,113.6" sap2010:WorkflowViewState.IdRef="Assign_3">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:String">[io_DistrictName]</OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:String">[(string.Join(",",out_TransactionItem.ItemArray)).Replace(",,,,,", "")]</InArgument>
+            </Assign.Value>
+          </Assign>
+          <Assign DisplayName="Assign : Remove keyword DIST " sap:VirtualizedContainerService.HintSize="433.6,113.6" sap2010:WorkflowViewState.IdRef="Assign_4">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:String">[io_DistrictName]</OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:String">[io_DistrictName.Replace(" DIST", "")]</InArgument>
+            </Assign.Value>
+          </Assign>
+          <Assign DisplayName="Assign : Next transaction row " sap:VirtualizedContainerService.HintSize="433.6,113.6" sap2010:WorkflowViewState.IdRef="Assign_6">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:Int32">[in_TransactionNumber]</OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:Int32">[in_TransactionNumber+1]</InArgument>
+            </Assign.Value>
+          </Assign>
+          <Assign DisplayName="Assign : Next transaction row item" sap:VirtualizedContainerService.HintSize="433.6,104.8" sap2010:WorkflowViewState.IdRef="Assign_5">
+            <Assign.To>
+              <OutArgument x:TypeArguments="sd:DataRow">[out_TransactionItem]</OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="sd:DataRow">[io_dt_TransactionData.Rows( in_TransactionNumber-1 )]</InArgument>
+            </Assign.Value>
+          </Assign>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Else : Row has required transaction details" sap:VirtualizedContainerService.HintSize="416,254.4" sap2010:WorkflowViewState.IdRef="Sequence_10">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <ui:LogMessage DisplayName="Log Message : Continue" sap:VirtualizedContainerService.HintSize="353.6,165.6" sap2010:WorkflowViewState.IdRef="LogMessage_4" Level="Info" Message="[&quot;Continue to process the current row&quot;]" />
         </Sequence>
       </If.Else>
     </If>
